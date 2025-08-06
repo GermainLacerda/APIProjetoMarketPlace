@@ -6,20 +6,21 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cookie;
 use App\Models\User;
 
 class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $request->validate([
+        $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required'
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $credentials['email'])->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             return response()->json([
                 'message' => 'Credenciais inválidas.'
             ], 401);
@@ -27,12 +28,21 @@ class AuthController extends Controller
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        Auth::login($user);
+        $cookie = cookie(
+            'access_token',  // nome
+            $token,          // valor
+            60 * 24,         // expiração em minutos (ex: 1 dia)
+            null,            // path
+            null,            // domain
+            true,            // Secure (HTTPS)
+            true,            // HttpOnly
+            false,           // Raw
+            'Strict'         // SameSite
+        );
 
         return response()->json([
-            'user' => $user,
-            // 'token' => $token
-        ]);
+            'message' => 'Login realizado com sucesso.',
+        ])->withCookie($cookie);
     }
 
     public function logout(Request $request)
