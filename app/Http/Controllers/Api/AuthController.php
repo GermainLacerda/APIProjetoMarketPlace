@@ -27,15 +27,20 @@ class AuthController extends Controller
 
         $token = $user->createToken('api-token')->plainTextToken;
 
+        Auth::login($user);
+
         return response()->json([
             'user' => $user,
-            'token' => $token
+            // 'token' => $token
         ]);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        // $request->user()->currentAccessToken()->delete();
+
+
+        Auth::guaard('web')->logout();
 
         return response()->json(['message' => 'Logout realizado com sucesso.']);
     }
