@@ -42,6 +42,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Login realizado com sucesso.',
+            'user' => $user,
         ])->withCookie($cookie);
     }
 
@@ -50,7 +51,7 @@ class AuthController extends Controller
         // $request->user()->currentAccessToken()->delete();
 
 
-        Auth::guaard('web')->logout();
+        Auth::guard('web')->logout();
 
         return response()->json(['message' => 'Logout realizado com sucesso.']);
     }
